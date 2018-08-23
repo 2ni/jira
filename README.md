@@ -1,6 +1,9 @@
 # What is it
-Code snippet to extract dependencies between AIS-EAI and other applications from jira
+Code snippet to extract dependencies between Stories in Jira
 Stories must contain "depends on" or similar. "is linked to" is ignored
+
+If [Script Runner](https://marketplace.atlassian.com/plugins/com.onresolve.jira.groovy.groovyrunner) installed you can use
+"issueFunction in hasLinks(blocks)"
 
 # How to setup
 Depends on Python 3
