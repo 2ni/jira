@@ -20,34 +20,40 @@ jqls = {
     }
 
 for title,jql in jqls.items():
+    page = 0;
     print("{delimiter} {title} {delimiter}".format(delimiter="-"*10, title=title))
-    stories = jira.search_issues(jql, maxResults=100)
-    #stories = [jira.issue("AIS-18819")]
-    for story in stories:
-        link_in = []
-        link_out = []
-        for link in story.fields.issuelinks:
-            #print(link, vars(link))
-            if hasattr(link, "inwardIssue") and not link.inwardIssue.key.startswith("AIS-") \
-            and not re.search("(clone|relates)", link.type.inward) \
-            and not link.inwardIssue.key in link_in:
-                #print(link.type.inward)
-                link_in.append("{key}:{status}".format(key=link.inwardIssue.key, status=link.inwardIssue.fields.status.name))
-                #print("{key} < {link}".format(key=story.key, link=link.inwardIssue.key))
-            if hasattr(link, "outwardIssue") \
-            and not link.outwardIssue.key.startswith("AIS-") \
-            and not re.search("(clone|relates)", link.type.outward) \
-            and not link.outwardIssue.key in link_out:
-                link_out.append("{key}:{status}".format(key=link.outwardIssue.key, status=link.outwardIssue.fields.status.name))
-                #print("{key} > {link}".format(key=story.key, link=link.outwardIssue.key))
+    while(1):
+        stories = jira.search_issues(jql, maxResults=100, startAt=page)
+        #stories = [jira.issue("AIS-18819")]
+        if (len(stories) == 0):
+            break
 
-        story_key = "{k}:{s}".format(k=story.key, s=story.fields.status.name)
-        print("{link_in:30s} > {key}\n".format(key=story_key, link_in = link_in[0]) if link_in else "", end="")
-        if len(link_in) > 1:
-            for l in link_in[1:]:
-                print(" {l:29s} >".format(l=l))
-        print("{key:30s} > {link_out}\n".format(key=story_key, link_out = link_out[0]) if link_out else "", end="")
-        if len(link_out) > 1:
-            for l in link_out[1:]:
-                print(" {l:29s} >".format(l=l))
-        sys.stdout.flush()
+        page += 100
+        for story in stories:
+            link_in = []
+            link_out = []
+            for link in story.fields.issuelinks:
+                #print(link, vars(link))
+                if hasattr(link, "inwardIssue") and not link.inwardIssue.key.startswith("AIS-") \
+                and not re.search("(clone|relates)", link.type.inward) \
+                and not link.inwardIssue.key in link_in:
+                    #print(link.type.inward)
+                    link_in.append("{key}:{status}".format(key=link.inwardIssue.key, status=link.inwardIssue.fields.status.name))
+                    #print("{key} < {link}".format(key=story.key, link=link.inwardIssue.key))
+                if hasattr(link, "outwardIssue") \
+                and not link.outwardIssue.key.startswith("AIS-") \
+                and not re.search("(clone|relates)", link.type.outward) \
+                and not link.outwardIssue.key in link_out:
+                    link_out.append("{key}:{status}".format(key=link.outwardIssue.key, status=link.outwardIssue.fields.status.name))
+                    #print("{key} > {link}".format(key=story.key, link=link.outwardIssue.key))
+
+            story_key = "{k}:{s}".format(k=story.key, s=story.fields.status.name)
+            print("{link_in:30s} > {key}\n".format(key=story_key, link_in = link_in[0]) if link_in else "", end="")
+            if len(link_in) > 1:
+                for l in link_in[1:]:
+                    print(" {l:29s} >".format(l=l))
+            print("{key:30s} > {link_out}\n".format(key=story_key, link_out = link_out[0]) if link_out else "", end="")
+            if len(link_out) > 1:
+                for l in link_out[1:]:
+                    print(" {l:29s} >".format(l=l))
+            sys.stdout.flush()
